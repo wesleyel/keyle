@@ -63,3 +63,47 @@
   delim_plus: "\u{E1B0}",
   delim_minus: "\u{E1B1}",
 )
+
+// Inline SVG glyphs for non-textual keys. Because a theme renders whatever
+// `sym` content it is handed, these are simply another kind of symbol on the
+// `sym` axis -- pass them straight to a generated `kbd`, e.g. `kbd(svg-key.up)`.
+// Paths use a 24x24 viewBox (Material Symbols geometry).
+#let _icon-paths = (
+  up: "M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z",
+  down: "M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z",
+  left: "M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z",
+  right: "M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z",
+  enter: "M19 7v4H5.83l3.58-3.59L8 6l-6 6 6 6 1.41-1.41L5.83 13H21V7z",
+  backspace: "M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 12.59L17.59 17 14 13.41 10.41 17 9 15.59 12.59 12 9 8.41 10.41 7 14 10.59 17.59 7 19 8.41 15.41 12 19 15.59z",
+  tab: "M11.59 7.41L15.17 11H1v2h14.17l-3.59 3.59L13 18l6-6-6-6-1.41 1.41zM20 6v12h2V6h-2z",
+)
+
+/// Render a non-textual key glyph as inline SVG content.
+///
+/// Available names: #(`up`, `down`, `left`, `right`, `enter`, `backspace`, `tab`).
+/// -> content
+#let svg-icon(
+  /// Glyph name. -> str
+  name,
+  /// Glyph fill color. -> color
+  fill: rgb("#333333"),
+  /// Glyph height. -> length
+  size: 0.85em,
+) = box(
+  baseline: 0.12em,
+  height: size,
+  image(
+    bytes(
+      "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='"
+        + _icon-paths.at(name)
+        + "' fill='" + fill.to-hex() + "'/></svg>",
+    ),
+    format: "svg",
+  ),
+)
+
+/// Convenience dictionary of default-styled SVG key glyphs (`svg-key.up`, ...).
+#let svg-key = _icon-paths.keys().fold((:), (acc, k) => {
+  acc.insert(k, svg-icon(k))
+  acc
+})

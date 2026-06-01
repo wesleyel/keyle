@@ -35,7 +35,7 @@ Please see the [keyle.pdf](https://github.com/magicwenli/keyle/blob/main/doc/key
 #let kbd = keyle.config()
 #kbd("Ctrl", "Shift", "K", delim: "-")
 ```
-![Custom Delimiter](test/test-1.png)
+![Custom Delimiter](test/test-01.png)
 
 #### Compact Mode
 
@@ -43,7 +43,13 @@ Please see the [keyle.pdf](https://github.com/magicwenli/keyle/blob/main/doc/key
 #let kbd = keyle.config()
 #kbd("Ctrl", "Shift", "K", compact: true)
 ```
-![Compact Mode](test/test-2.png)
+![Compact Mode](test/test-02.png)
+
+### Themes
+
+A theme is just a renderer function `sym => content`. The built-in presets live
+in `keyle.themes`. There are three backends: vector rectangles (`keycap`), a
+generated SVG shell (`svg-keycap`), and a font-based one (`biolinum`).
 
 #### Standard Theme
 
@@ -51,7 +57,7 @@ Please see the [keyle.pdf](https://github.com/magicwenli/keyle/blob/main/doc/key
 #let kbd = keyle.config(theme: keyle.themes.standard)
 #keyle.gen-examples(kbd)
 ```
-![Standard Theme](test/test-3.png)
+![Standard Theme](test/test-03.png)
 
 #### Deep Blue Theme
 
@@ -59,7 +65,7 @@ Please see the [keyle.pdf](https://github.com/magicwenli/keyle/blob/main/doc/key
 #let kbd = keyle.config(theme: keyle.themes.deep-blue)
 #keyle.gen-examples(kbd)
 ```
-![Deep Blue Theme](test/test-4.png)
+![Deep Blue Theme](test/test-04.png)
 
 #### Type Writer Theme
 
@@ -67,7 +73,7 @@ Please see the [keyle.pdf](https://github.com/magicwenli/keyle/blob/main/doc/key
 #let kbd = keyle.config(theme: keyle.themes.type-writer)
 #keyle.gen-examples(kbd)
 ```
-![Type Writer Theme](test/test-5.png)
+![Type Writer Theme](test/test-05.png)
 
 #### Biolinum Theme
 
@@ -75,7 +81,7 @@ Please see the [keyle.pdf](https://github.com/magicwenli/keyle/blob/main/doc/key
 #let kbd = keyle.config(theme: keyle.themes.biolinum, delim: keyle.biolinum-key.delim_plus)
 #keyle.gen-examples(kbd)
 ```
-![Biolinum Theme](test/test-6.png)
+![Biolinum Theme](test/test-06.png)
 
 #### Custom Theme
 
@@ -97,7 +103,82 @@ Please see the [keyle.pdf](https://github.com/magicwenli/keyle/blob/main/doc/key
 #let kbd = keyle.config(theme: radix_kdb)
 #keyle.gen-examples(kbd)
 ```
-![Custom Theme](test/test-7.png)
+![Custom Theme](test/test-07.png)
+
+#### Minimal Theme
+
+```tpy
+#let kbd = keyle.config(theme: keyle.themes.minimal)
+#keyle.gen-examples(kbd)
+```
+![Minimal Theme](test/test-08.png)
+
+#### Radix Theme
+
+```tpy
+#let kbd = keyle.config(theme: keyle.themes.radix)
+#keyle.gen-examples(kbd)
+```
+![Radix Theme](test/test-09.png)
+
+#### Flowbite Theme (SVG)
+
+```tpy
+#let kbd = keyle.config(theme: keyle.themes.flowbite)
+#keyle.gen-examples(kbd)
+```
+![Flowbite Theme](test/test-10.png)
+
+#### Flowbite Dark Theme (SVG)
+
+```tpy
+#let kbd = keyle.config(theme: keyle.themes.flowbite-dark)
+#keyle.gen-examples(kbd)
+```
+![Flowbite Dark Theme](test/test-11.png)
+
+#### Daisy Theme (SVG)
+
+```tpy
+#let kbd = keyle.config(theme: keyle.themes.daisy)
+#keyle.gen-examples(kbd)
+```
+![Daisy Theme](test/test-12.png)
+
+### Customize with `.with()`
+
+Every preset is a function with its style pre-bound, so you extend any of them
+with Typst's native `.with(...)` — no custom merge API to learn.
+
+```tpy
+#let rose = keyle.themes.flowbite.with(
+  fill: rgb("#fee2e2"),
+  stroke: rgb("#fca5a5"),
+  text-args: (fill: rgb("#991b1b"), weight: "bold"),
+)
+#let kbd = keyle.config(theme: rose)
+#keyle.gen-examples(kbd)
+```
+![Customize with .with()](test/test-13.png)
+
+The text layer (`text-args`, `wrap`) and the cap layer (`fill`, `stroke`,
+`radius`, `raise`, ...) are kept separate, so you can restyle one without
+touching the other.
+
+### SVG Key Glyphs
+
+A key symbol is just content, so non-textual keys can be passed as inline SVG
+glyphs from `keyle.svg-key` (`up`, `down`, `left`, `right`, `enter`,
+`backspace`, `tab`).
+
+```tpy
+#let kbd = keyle.config(theme: keyle.themes.flowbite)
+#kbd(keyle.svg-key.up) #kbd(keyle.svg-key.down)
+#kbd(keyle.svg-key.left) #kbd(keyle.svg-key.right)
+#kbd(keyle.svg-key.enter) #kbd(keyle.svg-key.backspace)
+#kbd(keyle.svg-key.tab)
+```
+![SVG Key Glyphs](test/test-14.png)
 
 ## License
 

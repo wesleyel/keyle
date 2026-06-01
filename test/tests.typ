@@ -132,3 +132,76 @@
   ```,
   title: [== Custom Theme],
 )
+#pagebreak()
+
+#example(
+  ```tpy
+  #let kbd = keyle.config(theme: keyle.themes.minimal)
+  #keyle.gen-examples(kbd)
+  ```,
+  title: [== Minimal Theme],
+)
+#pagebreak()
+
+#example(
+  ```tpy
+  #let kbd = keyle.config(theme: keyle.themes.radix)
+  #keyle.gen-examples(kbd)
+  ```,
+  title: [== Radix Theme],
+)
+#pagebreak()
+
+#example(
+  ```tpy
+  #let kbd = keyle.config(theme: keyle.themes.flowbite)
+  #keyle.gen-examples(kbd)
+  ```,
+  title: [== Flowbite Theme (SVG)],
+)
+#pagebreak()
+
+#example(
+  ```tpy
+  #let kbd = keyle.config(theme: keyle.themes.flowbite-dark)
+  #keyle.gen-examples(kbd)
+  ```,
+  title: [== Flowbite Dark Theme (SVG)],
+)
+#pagebreak()
+
+#example(
+  ```tpy
+  #let kbd = keyle.config(theme: keyle.themes.daisy)
+  #keyle.gen-examples(kbd)
+  ```,
+  title: [== Daisy Theme (SVG)],
+)
+#pagebreak()
+
+#example(
+  ```tpy
+  // Extend any preset with `.with(...)`.
+  #let rose = keyle.themes.flowbite.with(
+    fill: rgb("#fee2e2"),
+    stroke: rgb("#fca5a5"),
+    text-args: (fill: rgb("#991b1b"), weight: "bold"),
+  )
+  #let kbd = keyle.config(theme: rose)
+  #keyle.gen-examples(kbd)
+  ```,
+  title: [== Customize with .with()],
+)
+#pagebreak()
+
+#example(
+  ```tpy
+  // SVG glyphs are just another kind of `sym`.
+  #let kbd = keyle.config(theme: keyle.themes.flowbite)
+  #kbd(keyle.svg-key.up) #kbd(keyle.svg-key.down)
+  #kbd(keyle.svg-key.left) #kbd(keyle.svg-key.right)
+  #kbd(keyle.svg-key.enter) #kbd(keyle.svg-key.backspace)
+  #kbd(keyle.svg-key.tab)
+  ```,
+  title: [== SVG Key Glyphs],
+)

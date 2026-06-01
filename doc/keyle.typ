@@ -4,7 +4,7 @@
 
 #let doc-serif = ("Linux Libertine", "TeX Gyre Pagella")
 #let doc-sans = ("TeX Gyre Heros", "Helvetica Neue")
-#let doc-mono = ("TeX Gyre Cursor", "Linux Libertine Mono")
+#let doc-mono = ("FiraCode Nerd Font Mono", "Linux Libertine Mono")
 
 #let doc-theme = create-theme(
   fonts: (
@@ -118,6 +118,24 @@ You can create your own theme by defining a function that takes a string and ret
 #kbd("⌘ D") #kbd("^ F") 
 ```)
 
+== Extending a Theme with #raw(".with()")
+
+Every built-in theme is a #cmdref("keycap") or #cmdref("svg-keycap") factory
+with its style pre-bound. Because they are ordinary functions, you extend any of
+them using Typst's native #raw(".with(..)"), without learning a bespoke override
+API. The text layer (`text-args`, `wrap`) and the cap layer (`fill`, `stroke`,
+`radius`, `raise`, ...) stay separate.
+
+#example(```typst
+#let rose = keyle.themes.flowbite.with(
+  fill: rgb("#fee2e2"),
+  stroke: rgb("#fca5a5"),
+  text-args: (fill: rgb("#991b1b"), weight: "bold"),
+)
+#let kbd = keyle.config(theme: rose)
+#kbd("Ctrl", "Shift", "K")
+```)
+
 = Symbols
 
 == Mac Keyboard Symbols
@@ -131,8 +149,7 @@ You can create your own theme by defining a function that takes a string and ret
 #let mac-key = keyle.mac-key
 #let kbd = keyle.config(theme: keyle.themes.standard)
 #let mac-key-font = (
-  "TeX Gyre Cursor",
-  "Linux Libertine Mono",
+  "FiraCode Nerd Font Mono"
 )
 #grid(
   columns: (2fr, 1fr, 2fr, 1fr),
@@ -167,6 +184,22 @@ You can create your own theme by defining a function that takes a string and ret
 )
 ```)
 
+== SVG Key Glyphs
+
+A key symbol is just content, so non-textual keys can be passed as inline SVG
+glyphs from `#keyle.svg-key`. Available names are `up`, `down`, `left`, `right`,
+`enter`, `backspace` and `tab`.
+
+#example(```typst
+#let kbd = keyle.config(theme: keyle.themes.flowbite)
+#kbd(keyle.svg-key.up) #kbd(keyle.svg-key.down)
+#kbd(keyle.svg-key.left) #kbd(keyle.svg-key.right)
+#kbd(keyle.svg-key.enter) #kbd(keyle.svg-key.backspace)
+#kbd(keyle.svg-key.tab)
+```)
+
 = Available commands
 
 #tidy-module("keyle", read("../src/keyle.typ"), scope: (keyle: keyle))
+
+#tidy-module("cap", read("../src/cap.typ"), scope: (keyle: keyle))

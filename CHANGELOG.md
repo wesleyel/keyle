@@ -2,8 +2,19 @@
 
 ### Feat
 
+- redesign themes as `keycap`/`svg-keycap` factories; customize any preset via native `.with(...)`
+- separate the text layer (`text-args`, `wrap`) from the cap layer (geometry/colors)
+- add SVG backend and SVG-based themes: `flowbite`, `flowbite-dark`, `daisy`
+- add rect themes `minimal` and `radix`
+- add `svg-key` inline SVG glyphs (arrows, enter, backspace, tab) usable as any `sym`
 - migrate doc comments to tidy 0.4 syntax
 - upgrade manual build to mantys 1.0.2 for Typst 0.13+
+
+### Refactor
+
+- split `keyle.typ` into `cap.typ` (factories) + `themes.typ` (presets); `keyle.typ` is now a thin facade
+- optimize `standard`/`deep-blue` shadows from a 6-layer place loop to a single raised lip
+- keep `theme-func-*` names as backward-compatible aliases
 
 ### Fix
 
