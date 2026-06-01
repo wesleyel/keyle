@@ -1,17 +1,34 @@
-#import "@preview/mantys:0.1.4": *
-// Vendored because of https://github.com/jneug/typst-mantys/pull/20
-#let cmdref(name) = {
-  link(cmd-label(name), cmd-(name))
-}
-// End Vendored
+#import "@preview/mantys:1.0.2": *
 
 #import "../src/keyle.typ"
 
-#let lib-name = package[keyle]
-#show: mantys.with(..toml("../typst.toml"), date: datetime.today(), examples-scope: (keyle: keyle))
+#let doc-serif = ("Linux Libertine", "TeX Gyre Pagella")
+#let doc-sans = ("TeX Gyre Heros", "Helvetica Neue")
+#let doc-mono = ("TeX Gyre Cursor", "Linux Libertine Mono")
 
-#show link: underline
-#set text(font:("Linux Libertine", "Liberation Serif"))
+#let doc-theme = create-theme(
+  fonts: (
+    serif: doc-serif,
+    sans: doc-sans,
+    mono: doc-mono,
+  ),
+  text: (font: doc-serif),
+  heading: (font: doc-sans),
+  code: (font: doc-mono),
+)
+
+#let lib-name = package[keyle]
+#show: mantys(
+  ..toml("../typst.toml"),
+  title: [keyle],
+  date: datetime.today(),
+  theme: doc-theme,
+  examples-scope: (
+    scope: (keyle: keyle),
+  ),
+)
+
+#show std.link: underline
 
 // end of preamble
 
@@ -67,7 +84,7 @@ You can either use them in #cmdref("config") function or directly in generated `
 
 Themes function are available at `#keyle.themes` dictionary.
 
-#grid(columns: (2fr, 1fr), rows: 2em,align: horizon, ..keyle.themes.pairs().map(item => {
+#grid(columns: (2fr, 1fr), rows: 2em, align: horizon, ..keyle.themes.pairs().map(item => {
     let theme = item.at(0)
     let func = item.at(1)
     (
@@ -87,13 +104,13 @@ You can create your own theme by defining a function that takes a string and ret
 #let radix_kdb(content) = box(
   rect(
     inset: (x: 0.5em),
-    outset: (y:0.05em),
+    outset: (y: 0.05em),
     stroke: rgb("#1c2024") + 0.3pt,
     radius: 0.35em,
     fill: rgb("#fcfcfd"),
     text(fill: black, font: (
-      "Roboto",
       "Helvetica Neue",
+      "TeX Gyre Heros",
     ), content),
   ),
 )
@@ -114,9 +131,8 @@ You can create your own theme by defining a function that takes a string and ret
 #let mac-key = keyle.mac-key
 #let kbd = keyle.config(theme: keyle.themes.standard)
 #let mac-key-font = (
-  "Fira Code",
-  "FiraCode",
-  "FiraCode Nerd Font Mono",
+  "TeX Gyre Cursor",
+  "Linux Libertine Mono",
 )
 #grid(
   columns: (2fr, 1fr, 2fr, 1fr),
@@ -153,4 +169,4 @@ You can create your own theme by defining a function that takes a string and ret
 
 = Available commands
 
-#tidy-module(read("../src/keyle.typ"), name: "keyle", include-example-scope: true)
+#tidy-module("keyle", read("../src/keyle.typ"), scope: (keyle: keyle))

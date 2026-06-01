@@ -2,7 +2,14 @@
 
 ### Feat
 
-- suit project to commentizen
+- migrate doc comments to tidy 0.4 syntax
+- upgrade manual build to mantys 1.0.2 for Typst 0.13+
+
+### Fix
+
+- fix `theme-func-stardard` typo (kept as backward-compatible alias)
+- fix doc build on Typst 0.14 (`std.link` show rule, `mantys()` API, mantys 1.0.2)
+- bump test dependencies (codelst 2.0.2, showybox 2.0.4)
 
 ## 0.2.0 (2024-08-19)
 

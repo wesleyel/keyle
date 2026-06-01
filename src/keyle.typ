@@ -3,14 +3,33 @@
 #let shadow-times = 6
 
 /// Generate examples for the given keyboard rendering function.
-/// 
-/// - kbd (function): The keyboard rendering function.
 /// -> content
-#let gen-examples(kbd) = [
-#kbd("Ctrl", "A") #h(1em) #kbd("Alt", "P", compact: true)
+#let gen-examples(
+  /// The keyboard rendering function.
+  /// -> function
+  kbd,
+) = [
+  #kbd("Ctrl", "A") #h(1em) #kbd("Alt", "P", compact: true)
 
-#kbd("Home") #kbd("End") #kbd("Ins") #kbd("Del")
+  #kbd("Home") #kbd("End") #kbd("Ins") #kbd("Del")
 ]
+
+/// Join rendered keys with a delimiter between them.
+#let join-keys(keys, theme, delim) = {
+  let items = keys.map(k => [#theme(k)])
+  if delim == biolinum-key.delim_plus or delim == biolinum-key.delim_minus {
+    items.join(theme(delim))
+  } else {
+    context {
+      let sep = box(
+        height: measure(theme("A")).height,
+        inset: 2pt,
+        align(horizon, delim),
+      )
+      items.join(sep)
+    }
+  }
+}
 
 /// Theme function to render keys in a standard style.
 ///
@@ -18,11 +37,12 @@
 /// #let kbd = keyle.config(theme: keyle.themes.standard)
 /// #keyle.gen-examples(kbd)
 /// ```)
-///
-/// - sym (string): The key symbol to render.
 /// -> content
-#let theme-func-stardard(sym) = box({
-  let text-color = black
+#let theme-func-standard(
+  /// The key symbol to render.
+  /// -> str
+  sym,
+) = box({
   let bg-color = rgb("#eee")
   let stroke-color = rgb("#555")
 
@@ -45,17 +65,21 @@
   button
 })
 
+// Backward-compatible alias for the old misspelled name.
+#let theme-func-stardard = theme-func-standard
+
 /// Theme function to render keys in a deep blue style.
 ///
 /// #example(```typst
 /// #let kbd = keyle.config(theme: keyle.themes.deep-blue)
 /// #keyle.gen-examples(kbd)
 /// ```)
-///
-/// - sym (string): The key symbol to render.
 /// -> content
-#let theme-func-deep-blue(sym) = box({
-  let text-color = white
+#let theme-func-deep-blue(
+  /// The key symbol to render.
+  /// -> str
+  sym,
+) = box({
   let bg-color = rgb("#16456b")
   let stroke-color = rgb("#4682b4")
 
@@ -81,11 +105,12 @@
 /// #let kbd = keyle.config(theme: keyle.themes.type-writer)
 /// #keyle.gen-examples(kbd)
 /// ```)
-///
-/// - sym (string): The key symbol to render.
 /// -> content
-#let theme-func-type-writer(sym) = box({
-  let text-color = white
+#let theme-func-type-writer(
+  /// The key symbol to render.
+  /// -> str
+  sym,
+) = box({
   let bg-color = rgb("#333")
   let stroke-color = rgb("#2b2b2b")
 
@@ -112,7 +137,6 @@
       button
     },
   )
-
 })
 
 /// Theme function to render keys in a Linux Biolinum Keyboard style.
@@ -123,10 +147,12 @@
 /// #let kbd = keyle.config(theme: keyle.themes.biolinum, delim: keyle.biolinum-key.delim_plus)
 /// #keyle.gen-examples(kbd)
 /// ```)
-///
-/// - sym (string): The key symbol to render.
 /// -> content
-#let theme-func-biolinum(sym) = text(
+#let theme-func-biolinum(
+  /// The key symbol to render.
+  /// -> str
+  sym,
+) = text(
   fill: black,
   font: ("Linux Biolinum Keyboard"),
   size: 1.4em,
@@ -134,38 +160,31 @@
 )
 
 #let themes = (
-  standard: theme-func-stardard,
+  standard: theme-func-standard,
   deep-blue: theme-func-deep-blue,
   type-writer: theme-func-type-writer,
   biolinum: theme-func-biolinum,
 )
 
 /// Config function to generate keyboard rendering helper function.
-///
-/// - theme (function): The theme function to use.
-/// - compact (bool): Whether to render keys in a compact format.
-/// - delim (string): The delimiter to use when rendering keys in compact format.
 /// -> function
 #let config(
+  /// The theme function to use.
+  /// -> function
   theme: themes.standard,
+  /// Whether to render keys in a compact format.
+  /// -> bool
   compact: false,
+  /// The delimiter to use between keys.
+  /// -> str
   delim: "+",
 ) = (
   (..keys, compact: compact, delim: delim) => {
+    let key-list = keys.pos()
     if compact {
-      theme(keys.pos().join(delim))
+      theme(key-list.join(delim))
     } else {
-      if delim == biolinum-key.delim_plus or delim == biolinum-key.delim_minus {
-        keys.pos().map(k => [#theme(k)]).join(theme(delim))
-      } else {
-        context keys.pos().map(k => [#theme(k)]).join(
-          box(
-            height: measure(theme("A")).height,
-            inset: 2pt,
-            align(horizon, delim),
-          ),
-        )
-      }
+      join-keys(key-list, theme, delim)
     }
   }
 )
