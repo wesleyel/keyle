@@ -24,7 +24,7 @@ Please see the [keyle.pdf](https://github.com/magicwenli/keyle/blob/main/doc/key
 `keyle` is imported using:
 
 ```typst
-#import "@preview/keyle:0.2.0"
+#import "@preview/keyle:0.2.1"
 ```
 
 ### Example
