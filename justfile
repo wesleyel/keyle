@@ -82,6 +82,8 @@ release VERSION=version:
     branch="{{pkg-name}}-$ver"
     repo="{{packages-repo}}"
     pkg_dir="packages/preview/{{pkg-name}}/$ver"
+    root="{{justfile_directory()}}"
+    body_file="$(mktemp)"
 
     just example
     just doc
@@ -97,16 +99,48 @@ release VERSION=version:
 
     git -C "$repo" push -u origin "$branch"
 
-    if gh pr view --repo typst/packages --head "wesleyel:$branch" >/dev/null 2>&1; then
-      echo "PR already exists:"
-      gh pr view --repo typst/packages --head "wesleyel:$branch" --web
+    description="$(sed -n 's/^description = "\(.*\)"/\1/p' "$root/typst.toml")"
+    changelog="$(awk -v ver="## $ver" '$0 == ver { found = 1 } found && /^## / && $0 != ver { exit } found { print }' "$root/CHANGELOG.md")"
+    pkg_root="$repo/packages/preview/{{pkg-name}}"
+    if [ -d "$pkg_root" ] && [ "$(find "$pkg_root" -mindepth 1 -maxdepth 1 -type d ! -name "$ver" 2>/dev/null | wc -l | tr -d ' ')" -gt 0 ]; then
+      new_box=" "
+      update_box="x"
+    else
+      new_box="x"
+      update_box=" "
+    fi
+
+    cat >"$body_file" <<EOF
+I am submitting
+- [${new_box}] a new package
+- [${update_box}] an update for a package
+
+Description: ${description}
+
+I have read and followed the submission guidelines and, in particular, I
+- [x] selected a name that isn't the most obvious or canonical name for what the package does
+- [x] added a \`typst.toml\` file with all required keys
+- [x] added a \`README.md\` with documentation for my package
+- [x] have chosen a license and added a \`LICENSE\` file or linked one in my \`README.md\`
+- [x] tested my package locally on my system and it worked
+- [x] \`exclude\`d PDFs or README images, if any, but not the LICENSE
+
+${changelog}
+EOF
+
+    if [ "$(gh pr list --repo typst/packages --head "$branch" --json number --jq 'length')" -gt 0 ]; then
+      echo "PR already exists, updating body:"
+      gh pr edit "$branch" --repo typst/packages --body-file "$body_file"
+      gh pr view "$branch" --repo typst/packages --web
     else
       gh pr create --repo typst/packages \
         --head "wesleyel:$branch" \
         --base main \
         --title "{{pkg-name}}:$ver" \
-        --body "Submit @preview/{{pkg-name}}:$ver to Typst Universe."
+        --body-file "$body_file"
     fi
+
+    rm -f "$body_file"
 
 bump $VERSION $FORCE="":
     perl -pi -e 's/^version = .*/version = "'"$VERSION"'"/g' typst.toml
