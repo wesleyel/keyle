@@ -1,4 +1,4 @@
-## Unreleased
+## 0.3.0
 
 ### Feat
 
@@ -6,7 +6,8 @@
 - separate the text layer (`text-args`, `wrap`) from the cap layer (geometry/colors)
 - add SVG backend and SVG-based themes: `flowbite`, `flowbite-dark`, `daisy`
 - add rect themes `minimal` and `radix`
-- add `svg-key` inline SVG glyphs (arrows, enter, backspace, tab) usable as any `sym`
+- add `svg-key` inline SVG glyphs (arrows, enter, backspace, tab, win) usable as any `sym`
+- support a per-glyph viewBox for `svg-icon` so glyphs from different icon sets render correctly
 - migrate doc comments to tidy 0.4 syntax
 - upgrade manual build to mantys 1.0.2 for Typst 0.13+
 
@@ -18,6 +19,8 @@
 
 ### Fix
 
+- redraw the `win` glyph as a clean 4-pane Windows logo (was a distorted slanted shape)
+- fix `svg-icon` baseline and size so glyphs align with text and adjacent keycaps
 - fix `theme-func-stardard` typo (kept as backward-compatible alias)
 - fix doc build on Typst 0.14 (`std.link` show rule, `mantys()` API, mantys 1.0.2)
 - bump test dependencies (codelst 2.0.2, showybox 2.0.4)

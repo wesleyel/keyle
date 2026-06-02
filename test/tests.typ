@@ -1,6 +1,6 @@
 #import "@preview/codelst:2.0.2": sourcecode
 #import "@preview/showybox:2.0.4": showybox
-#import "../src/keyle.typ"
+#import "@preview/keyle:0.3.0"
 
 #set document(date: none)
 #set page(margin: 0.5cm, width: auto, height: auto)
@@ -201,7 +201,7 @@
   #kbd(keyle.svg-key.up) #kbd(keyle.svg-key.down)
   #kbd(keyle.svg-key.left) #kbd(keyle.svg-key.right)
   #kbd(keyle.svg-key.enter) #kbd(keyle.svg-key.backspace)
-  #kbd(keyle.svg-key.tab)
+  #kbd(keyle.svg-key.tab) #kbd(keyle.svg-key.win)
   ```,
   title: [== SVG Key Glyphs],
 )

@@ -46,7 +46,7 @@
   /// Shadow color, or `none` to disable. -> color | none
   shadow: rgb("#555555"),
   /// Baseline shift of the cap relative to surrounding text. -> length | ratio
-  baseline: 0.3em,
+  baseline: 0.1em,
   /// Text layer arguments spread into `text`. -> dictionary
   text-args: (fill: black),
   /// Text layer content transform. -> function

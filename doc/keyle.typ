@@ -1,6 +1,6 @@
 #import "@preview/mantys:1.0.2": *
 
-#import "../src/keyle.typ"
+#import "@preview/keyle:0.3.0"
 
 #let doc-serif = ("Linux Libertine", "TeX Gyre Pagella")
 #let doc-sans = ("TeX Gyre Heros", "Helvetica Neue")
@@ -48,7 +48,7 @@ Send them respect!
 #lib-name is imported using
 
 #codesnippet[```typ
-    #import "@preview/keyle:0.2.1"
+    #import "@preview/keyle:0.3.0"
   ```]
 
 == Quick Start
@@ -188,14 +188,14 @@ API. The text layer (`text-args`, `wrap`) and the cap layer (`fill`, `stroke`,
 
 A key symbol is just content, so non-textual keys can be passed as inline SVG
 glyphs from `#keyle.svg-key`. Available names are `up`, `down`, `left`, `right`,
-`enter`, `backspace` and `tab`.
+`enter`, `backspace`, `tab` and `win`.
 
 #example(```typst
 #let kbd = keyle.config(theme: keyle.themes.flowbite)
 #kbd(keyle.svg-key.up) #kbd(keyle.svg-key.down)
 #kbd(keyle.svg-key.left) #kbd(keyle.svg-key.right)
 #kbd(keyle.svg-key.enter) #kbd(keyle.svg-key.backspace)
-#kbd(keyle.svg-key.tab)
+#kbd(keyle.svg-key.tab) #kbd(keyle.svg-key.win)
 ```)
 
 = Available commands

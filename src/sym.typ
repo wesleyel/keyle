@@ -76,11 +76,18 @@
   enter: "M19 7v4H5.83l3.58-3.59L8 6l-6 6 6 6 1.41-1.41L5.83 13H21V7z",
   backspace: "M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 12.59L17.59 17 14 13.41 10.41 17 9 15.59 12.59 12 9 8.41 10.41 7 14 10.59 17.59 7 19 8.41 15.41 12 19 15.59z",
   tab: "M11.59 7.41L15.17 11H1v2h14.17l-3.59 3.59L13 18l6-6-6-6-1.41 1.41zM20 6v12h2V6h-2z",
+  // Bootstrap Icons "windows" (16x16 viewBox, see `_icon-viewbox`).
+  win: "M6.555 1.375 0 2.237v5.45h6.555V1.375zM0 13.795l6.555.933V8.313H0v5.482zm7.278-5.4.026 6.378L16 16V8.395H7.278zM16 0 7.33 1.244v6.414H16V0z",
+)
+
+// Per-glyph SVG viewBox; glyphs default to the 24x24 Material Symbols grid.
+#let _icon-viewbox = (
+  win: "0 0 16 16",
 )
 
 /// Render a non-textual key glyph as inline SVG content.
 ///
-/// Available names: #(`up`, `down`, `left`, `right`, `enter`, `backspace`, `tab`).
+/// Available names: #(`up`, `down`, `left`, `right`, `enter`, `backspace`, `tab`, `win`).
 /// -> content
 #let svg-icon(
   /// Glyph name. -> str
@@ -88,13 +95,15 @@
   /// Glyph fill color. -> color
   fill: rgb("#333333"),
   /// Glyph height. -> length
-  size: 0.85em,
+  size: 0.72em,
 ) = box(
-  baseline: 0.12em,
+  baseline: 0.0em,
   height: size,
   image(
     bytes(
-      "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='"
+      "<svg xmlns='http://www.w3.org/2000/svg' viewBox='"
+        + _icon-viewbox.at(name, default: "0 0 24 24")
+        + "'><path d='"
         + _icon-paths.at(name)
         + "' fill='" + fill.to-hex() + "'/></svg>",
     ),
