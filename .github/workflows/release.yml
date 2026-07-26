@@ -43,16 +43,19 @@ jobs:
           echo "name=$name" >> "$GITHUB_OUTPUT"
           echo "description=$description" >> "$GITHUB_OUTPUT"
 
-      - name: Check out typst/packages (sparse)
+      - name: Check out the packages fork (sparse)
         env:
-          GH_PAT: ${{ secrets.PACKAGES_PAT }}
+          GH_TOKEN: ${{ secrets.PACKAGES_PAT }}
           NAME: ${{ steps.meta.outputs.name }}
         run: |
+          # Best-effort sync of the fork with upstream; the branch is based on
+          # the fork's main either way, so pushing it never touches upstream's
+          # .github/workflows history (which would need `workflow` PAT scope).
+          gh repo sync "$FORK" --source "$UPSTREAM" || echo "fork sync skipped"
           git clone --filter=blob:none --sparse \
-            "https://github.com/$UPSTREAM.git" packages
+            "https://x-access-token:$GH_TOKEN@github.com/$FORK.git" packages
           cd packages
           git sparse-checkout set "packages/preview/$NAME"
-          git remote add fork "https://x-access-token:$GH_PAT@github.com/$FORK.git"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -75,7 +78,6 @@ jobs:
 
       - name: Commit and push to the fork
         env:
-          GH_PAT: ${{ secrets.PACKAGES_PAT }}
           NAME: ${{ steps.meta.outputs.name }}
           VERSION: ${{ steps.meta.outputs.version }}
         run: |
@@ -88,7 +90,7 @@ jobs:
           else
             git commit -m "Release $NAME $VERSION"
           fi
-          git push -f -u fork "$branch"
+          git push -f -u origin "$branch"
 
       - name: Open or update the PR
         env:
