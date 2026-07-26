@@ -1,0 +1,140 @@
+# Opens (or updates) the release PR on typst/packages when a version tag is
+# pushed (`just bump X.Y.Z` does that), or on manual dispatch.
+#
+# Requires a `PACKAGES_PAT` repository secret: a personal access token with
+# `public_repo` scope that can push to the wesleyel/packages fork and open
+# pull requests on typst/packages.
+
+name: release
+
+on:
+  push:
+    tags: ["[0-9]+.[0-9]+.[0-9]+"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (defaults to typst.toml)"
+        required: false
+
+env:
+  FORK: wesleyel/packages
+  UPSTREAM: typst/packages
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out keyle
+        uses: actions/checkout@v4
+        with:
+          path: keyle
+
+      - name: Read package metadata
+        id: meta
+        run: |
+          cd keyle
+          version="${{ inputs.version }}"
+          if [ -z "$version" ]; then
+            version="$(sed -n 's/^version = "\(.*\)"/\1/p' typst.toml)"
+          fi
+          name="$(sed -n 's/^name = "\(.*\)"/\1/p' typst.toml)"
+          description="$(sed -n 's/^description = "\(.*\)"/\1/p' typst.toml)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "description=$description" >> "$GITHUB_OUTPUT"
+
+      - name: Check out typst/packages (sparse)
+        env:
+          GH_PAT: ${{ secrets.PACKAGES_PAT }}
+          NAME: ${{ steps.meta.outputs.name }}
+        run: |
+          git clone --filter=blob:none --sparse \
+            "https://github.com/$UPSTREAM.git" packages
+          cd packages
+          git sparse-checkout set "packages/preview/$NAME"
+          git remote add fork "https://x-access-token:$GH_PAT@github.com/$FORK.git"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync package files
+        env:
+          NAME: ${{ steps.meta.outputs.name }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          target="packages/packages/preview/$NAME/$VERSION"
+          rm -rf "$target"
+          mkdir -p "$target"
+          rsync -a --delete \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude '.gitignore' \
+            --exclude 'test/' \
+            --exclude 'justfile' \
+            --exclude 'CHANGELOG.md' \
+            keyle/ "$target/"
+
+      - name: Commit and push to the fork
+        env:
+          GH_PAT: ${{ secrets.PACKAGES_PAT }}
+          NAME: ${{ steps.meta.outputs.name }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          cd packages
+          branch="$NAME-$VERSION"
+          git checkout -b "$branch"
+          git add "packages/preview/$NAME"
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Release $NAME $VERSION"
+          fi
+          git push -f -u fork "$branch"
+
+      - name: Open or update the PR
+        env:
+          GH_TOKEN: ${{ secrets.PACKAGES_PAT }}
+          NAME: ${{ steps.meta.outputs.name }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          DESCRIPTION: ${{ steps.meta.outputs.description }}
+        run: |
+          branch="$NAME-$VERSION"
+          fork_owner="${FORK%%/*}"
+
+          changelog="$(awk -v ver="## $VERSION" \
+            '$0 == ver { found = 1 } found && /^## / && $0 != ver { exit } found { print }' \
+            keyle/CHANGELOG.md)"
+          pkg_root="packages/packages/preview/$NAME"
+          if [ "$(find "$pkg_root" -mindepth 1 -maxdepth 1 -type d ! -name "$VERSION" | wc -l)" -gt 0 ]; then
+            new_box=" "; update_box="x"
+          else
+            new_box="x"; update_box=" "
+          fi
+
+          cat > body.md <<EOF
+          I am submitting
+          - [${new_box}] a new package
+          - [${update_box}] an update for a package
+
+          Description: ${DESCRIPTION}
+
+          I have read and followed the submission guidelines and, in particular, I
+          - [x] selected a name that isn't the most obvious or canonical name for what the package does
+          - [x] added a \`typst.toml\` file with all required keys
+          - [x] added a \`README.md\` with documentation for my package
+          - [x] have chosen a license and added a \`LICENSE\` file or linked one in my \`README.md\`
+          - [x] tested my package locally on my system and it worked
+          - [x] \`exclude\`d PDFs or README images, if any, but not the LICENSE
+
+          ${changelog}
+          EOF
+
+          if [ "$(gh pr list --repo "$UPSTREAM" --head "$branch" --json number --jq 'length')" -gt 0 ]; then
+            echo "PR already exists, updating body."
+            gh pr edit "$branch" --repo "$UPSTREAM" --body-file body.md
+          else
+            gh pr create --repo "$UPSTREAM" \
+              --head "$fork_owner:$branch" \
+              --base main \
+              --title "$NAME:$VERSION" \
+              --body-file body.md
+          fi

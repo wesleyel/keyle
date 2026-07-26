@@ -1,3 +1,29 @@
+## 0.4.0
+
+### Feat
+
+- target Typst 0.15 (`compiler = "0.15.0"`)
+- export a ready-to-use `kbd` renderer: `#import "@preview/keyle:0.4.0": kbd` works without `config()`
+- parse shortcut strings: `kbd("Ctrl+Shift+P")` splits on `+` (lone `+` stays literal; opt out with `parse: false`)
+- normalize key aliases case-insensitively: `cmd` -> ⌘, `opt` -> ⌥, `up`/`down`/`left`/`right` -> arrows (opt out with `normalize: false`)
+- add `layout: "mac"` mapping all common key names to Apple glyphs (`ctrl` -> ⌃, `shift` -> ⇧, `enter` -> ↩, ...)
+- accept theme names in `config`: `keyle.config(theme: "flowbite")`
+- support HTML export: keys embed as inline SVG (`html: "frame"`, default), as semantic `<kbd>` elements (`html: "kbd"`), or pass through (`html: none`); added `just test-html` smoke test
+- expose `resolve-theme`, `expand-shortcuts`, `normalize-key`, `key-aliases`, `mac-aliases`
+
+### Refactor
+
+- migrate the manual from mantys (broken on Typst 0.15, no fixed release yet) to tidy 0.4.3 + codelst
+- tests/example/doc import `src/` directly; no local package tree or `.packages/` checkout needed to build
+- simplify the justfile to everyday recipes (`test`/`test-html`/`example`/`doc`/`all`/`bump`); releasing to typst/packages now runs in GitHub Actions (`.github/workflows/release.yml`, triggered by pushing a version tag)
+
+- build alias tables from `(glyph, (..names))` groups via `array.to-dict` instead of hand-written repeated-value dict literals
+
+### Fix
+
+- stabilize delimiter vertical alignment across themes: the delimiter is rendered through the theme itself -- `keycap`/`svg-keycap`/`type-writer` draw it as if it were a key (same box, baseline and centering) with an invisible shell, so it aligns with the keys by construction; custom theme functions fall back to measuring the cap's descent with a zero-width probe plus an optical correction
+- fix justfile parsing broken by the unindented release PR-body heredoc
+
 ## 0.3.0
 
 ### Feat

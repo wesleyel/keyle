@@ -5,7 +5,7 @@
 //   #let mine = keyle.themes.flat.with(fill: rgb("#fee"))
 //   #let kbd = keyle.config(theme: mine)
 
-#import "cap.typ": keycap, svg-keycap, style-text
+#import "cap.typ": keycap, svg-keycap, style-text, _delim-probe, _delim-ack, _delim-of
 
 /// Linux Biolinum Keyboard font theme. Needs the font installed.
 /// -> content
@@ -24,6 +24,16 @@
   /// The key symbol. -> any
   sym,
 ) = {
+  if sym == _delim-probe { return _delim-ack }
+  let delim = _delim-of(sym)
+  if delim != none {
+    // Same vertical structure as a key (ring inset + button inset), no shell.
+    return box(
+      baseline: baseline,
+      inset: (x: 0.5pt, y: 2.2pt),
+      rect(inset: (x: 1.5pt, y: 2.5pt), stroke: none, fill: none, delim),
+    )
+  }
   let bg = rgb("#333333")
   let edge = rgb("#2b2b2b")
   let cust = rect.with(inset: (x: 3pt, y: 2.5pt), stroke: bg, fill: edge, radius: 50%)

@@ -1,11 +1,11 @@
 #import "@preview/codelst:2.0.2": sourcecode
 #import "@preview/showybox:2.0.4": showybox
-#import "@preview/keyle:0.3.0"
+#import "/src/keyle.typ"
 
 #set document(date: none)
 #set page(margin: 0.5cm, width: auto, height: auto)
 
-#let example-scope = (keyle: keyle)
+#let example-scope = (keyle: keyle, kbd: keyle.kbd)
 #let frame(..args) = showybox(
   frame: (
     border-color: gray,
@@ -56,6 +56,68 @@
 #show raw.where(lang: "example"): text => {
   example(raw(text.text, lang: "typc"))
 }
+
+#example(
+  ```tpy
+  // `kbd` works out of the box: #import "@preview/keyle:0.4.0": kbd
+  #kbd("Ctrl", "Shift", "P")
+  ```,
+  title: [== Default kbd],
+)
+#pagebreak()
+
+#example(
+  ```tpy
+  // Shortcut strings split on "+".
+  #kbd("Ctrl+Shift+P") #h(1em) #kbd("Ctrl + K", "V")
+
+  // A lone "+" stays literal.
+  #kbd("Ctrl", "+") #h(1em) #kbd("+")
+  ```,
+  title: [== Shortcut String Parsing],
+)
+#pagebreak()
+
+#example(
+  ```tpy
+  // Unambiguous aliases map by default: cmd -> ⌘, up -> ↑.
+  #kbd("cmd", "shift", "P") #h(1em) #kbd("up") #kbd("down") #kbd("left") #kbd("right")
+
+  // Ctrl/Alt/Shift stay as written unless layout: "mac".
+  #kbd("Ctrl", "Alt", "Del")
+  ```,
+  title: [== Key Aliases],
+)
+#pagebreak()
+
+#example(
+  ```tpy
+  #let mac = keyle.config(layout: "mac", delim: none)
+  #mac("cmd+shift+P") #h(1em) #mac("Ctrl", "Alt", "Del") #h(1em) #mac("enter") #mac("esc") #mac("tab")
+  ```,
+  title: [== Mac Layout],
+)
+#pagebreak()
+
+#example(
+  ```tpy
+  // Opt out of parsing/normalization.
+  #let raw-kbd = keyle.config(parse: false, normalize: false)
+  #raw-kbd("cmd") #h(1em) #raw-kbd("Ctrl+K")
+  ```,
+  title: [== Literal Mode],
+)
+#pagebreak()
+
+#example(
+  ```tpy
+  // Themes can be selected by name.
+  #let kbd = keyle.config(theme: "flowbite")
+  #kbd("Ctrl", "K")
+  ```,
+  title: [== Theme by Name],
+)
+#pagebreak()
 
 #example(
   ```tpy

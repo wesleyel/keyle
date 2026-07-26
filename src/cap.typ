@@ -14,6 +14,36 @@
 /// -> length
 #let _len(v) = if type(v) == length { v } else { float(v) * 1pt }
 
+/// Delimiter handshake used by `join-keys`. A theme is first called with
+/// `_delim-probe`; factories that can render a shell-less delimiter answer
+/// `_delim-ack`. The delimiter is then passed wrapped in `_delim-mark`, and
+/// the factory renders it as if it were a key -- same box, baseline and
+/// centering -- but with an invisible shell, so it aligns with the keys by
+/// construction. Functions that don't know the handshake render the probe
+/// as an (unused) key, which `join-keys` detects and falls back to
+/// measurement.
+#let _delim-probe = metadata("keyle-delim-probe")
+#let _delim-ack = metadata("keyle-delim-ack")
+
+/// Wrap a delimiter for shell-less rendering by a factory.
+/// -> content
+#let _delim-mark(delim) = metadata((keyle-delim: delim))
+
+/// Extract the delimiter from a `_delim-mark` wrapper, coerced to content
+/// (so `delim: none` still renders as the invisible-shell gap), or `none`
+/// for a regular key symbol.
+/// -> content | none
+#let _delim-of(sym) = {
+  if (
+    type(sym) == content
+      and sym.func() == metadata
+      and type(sym.value) == dictionary
+      and "keyle-delim" in sym.value
+  ) {
+    [#sym.value.keyle-delim]
+  }
+}
+
 /// Text layer: turn a key symbol into styled content.
 ///
 /// `wrap` may be any `content -> content` function, so builtin transforms can
@@ -54,9 +84,21 @@
   /// The key symbol. -> any
   sym,
 ) = {
+  if sym == _delim-probe { return _delim-ack }
+  let r = _len(raise)
+  let delim = _delim-of(sym)
+  if delim != none {
+    // Same box, insets and baseline as a key, but nothing is drawn: the
+    // delimiter sits exactly where a key symbol would.
+    let pad = if type(inset) == dictionary { inset + (x: 1.5pt) } else { inset }
+    return box(
+      baseline: baseline,
+      inset: (right: r, bottom: r),
+      rect(inset: pad, stroke: none, fill: none, delim),
+    )
+  }
   let body = style-text(sym, args: text-args, wrap: wrap)
   let face = rect(inset: inset, radius: radius, stroke: stroke, fill: fill, body)
-  let r = _len(raise)
   box(
     baseline: baseline,
     inset: (right: r, bottom: r),
@@ -122,12 +164,29 @@
   /// The key symbol. -> any
   sym,
 ) = {
+  if sym == _delim-probe { return _delim-ack }
+  let lip-len = lip * 1pt
+  let delim = _delim-of(sym)
+  if delim != none {
+    // Same box height, baseline and horizon centering as a key (whose height
+    // is derived from its text line), but no SVG shell is drawn.
+    return context {
+      let ghost = style-text("A", args: text-args, wrap: wrap)
+      let h = measure(ghost).height + 2 * pad.y + lip-len
+      let w = measure(delim).width + 2 * 2pt
+      box(
+        baseline: baseline,
+        width: w,
+        height: h,
+        place(center + horizon, dy: -lip-len / 2, delim),
+      )
+    }
+  }
   let body = style-text(sym, args: text-args, wrap: wrap)
   let shadow-c = if shadow == auto { stroke } else { shadow }
   let shadow-hex = if shadow == none { none } else { shadow-c.to-hex() }
   context {
     let m = measure(body)
-    let lip-len = lip * 1pt
     let w = (m.width + 2 * pad.x) / 1pt
     let h = (m.height + 2 * pad.y + lip-len) / 1pt
     let svg = _keycap-svg(w, h, fill.to-hex(), stroke.to-hex(), stroke-width, radius, lip, shadow-hex)

@@ -64,6 +64,50 @@
   delim_minus: "\u{E1B1}",
 )
 
+/// Build an alias dictionary from `(glyph, (..names))` pairs, mapping every
+/// name in a group to its glyph.
+/// -> dictionary
+#let _alias-table(..groups) = {
+  groups
+    .pos()
+    .map(((glyph, names)) => names.map(name => (name, glyph)))
+    .join()
+    .to-dict()
+}
+
+/// Universal key-name aliases, applied by default when normalization is on.
+/// Only names that unambiguously denote a glyph are mapped -- `"Ctrl"`,
+/// `"Alt"`, `"Shift"` etc. are left untouched so Windows/Linux docs render
+/// as written. Lookup is case-insensitive.
+#let key-aliases = _alias-table(
+  ("⌘", ("cmd", "command")),
+  ("⌥", ("opt", "option")),
+  ("↑", ("up",)),
+  ("↓", ("down",)),
+  ("←", ("left",)),
+  ("→", ("right",)),
+)
+
+/// Mac-layout aliases: every common key name maps to its Apple glyph
+/// (#link("https://support.apple.com/en-hk/guide/mac-help/cpmh0011/mac")[reference]).
+/// Enabled with `config(layout: "mac")`.
+#let mac-aliases = key-aliases + _alias-table(
+  ("⌃", ("ctrl", "control")),
+  ("⇧", ("shift",)),
+  ("⌥", ("alt",)),
+  ("↩", ("return", "enter")),
+  ("⎋", ("esc", "escape")),
+  ("⌫", ("del", "delete", "backspace")),
+  ("⌦", ("forward-delete",)),
+  ("⇥", ("tab",)),
+  ("⇪", ("caps", "capslock")),
+  ("␣", ("space",)),
+  ("⇞", ("pgup", "pageup")),
+  ("⇟", ("pgdn", "pagedown")),
+  ("↖", ("home",)),
+  ("↘", ("end",)),
+)
+
 // Inline SVG glyphs for non-textual keys. Because a theme renders whatever
 // `sym` content it is handed, these are simply another kind of symbol on the
 // `sym` axis -- pass them straight to a generated `kbd`, e.g. `kbd(svg-key.up)`.
